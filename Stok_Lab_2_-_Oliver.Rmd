@@ -1,0 +1,86 @@
+---
+title: "Inlämningsuppgift Del 2"
+author: "Oliver Ng (19950305 - 0313)"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    fig_caption: yes
+---
+
+```{r}
+set.seed(950308) # Byt ÅÅMMDD mot ditt födelsedatum
+```
+
+# Sammanfattning.
+
+Laboration om att använda score, wald och likelihood test i R, värderna återanvänds igen från den föregående lab med samma data.
+
+```{r}
+load("proj_data.Rdata")
+modell <- glm(Resultat ~ Alder + Kon + Utbildare, 
+              data = data_individ,
+              family = "binomial")
+summary(modell)
+
+y <- matrix(data_individ$Resultat, ncol = 1)
+X <- model.matrix(Resultat ~ Alder + Kon + Utbildare, 
+                  data = data_individ)
+```
+
+Till början, testa att funktionerna ```I``` och ```NR``` ger ett wald test ```z-test``` alltså. Här återanvänds koderna från Lab1 uppgift 1 och 3.:
+
+```{r, code = readLines("funktioner.R")}
+```
+
+```{r}
+theta <- c(0,0,0,0)
+theta_hat <- NR(c(0, 0, 0, 0), 3, y, X)
+
+squared <- sqrt(solve(I(c(0,0,0,0), y, X)))
+
+std_err <- c(squared[1],squared[6],squared[11],squared[16])
+
+(theta_hat - theta)/std_err
+```
+
+Eh jag är övertalad nog:
+
+# Uppgift 2.
+
+```{r}
+eta <- NR(theta0 = c(0, 0, 0), niter = 10, y, X[, -3])
+
+eta
+
+c(eta)
+
+W <- 2*(l(c(eta), y, X[,-3]) -  l(c(0,0,0), y, X[,-3]))
+
+W
+
+chisq.test(W)
+```
+
+# Uppgift 3
+
+``` {r}
+neta <- NR(theta0 = c(0, 0), niter = 10, y, X[, -c(1,3)])
+neta
+
+Wn <- 2*log(L(c(neta), y, X[, -c(1,3)])/ L(c(0,0), y, X[, -c(1,3)]))
+Wn
+
+Ts <- t(S(c(neta), y, X[, -c(1,3)]))%*%solve(I(c(neta), y, X[, -c(1,3)]))%*%S(c(neta), y, X[, -c(1,3)])
+```
+
+# Uppgift 4
+
+```{r}
+theta.Kon <- 0.5 # example value
+profil <- glm.fit(x = X[, -3], y = y,
+                  offset = theta.Kon * X[, 3],
+                  family = binomial())
+profil$coeff
+```
+
+Bas koden framme, justera efter upplysning. Stora skillnad av resultat från instruktioner, fel input?
