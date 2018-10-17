@@ -27,7 +27,7 @@ X <- model.matrix(Resultat ~ Alder + Kon + Utbildare,
                   data = data_individ)
 ```
 
-Till början, testa att funktionerna ```I``` och ```NR``` ger ett wald test ```z-test``` alltså. Här återanvänds koderna från Lab1 uppgift 1 och 3.:
+Till början, testa att funktionerna ```I``` och ```NR``` ger ett wald test, ```z-test``` alltså. Här återanvänds koderna från Lab1 uppgift 1 och 3.:
 
 ```{r, code = readLines("funktioner.R")}
 ```
@@ -43,9 +43,11 @@ std_err <- c(squared[1],squared[6],squared[11],squared[16])
 (theta_hat - theta)/std_err
 ```
 
-Eh jag är övertalad nog:
+Eh tillräckligt nära z-värde
 
 # Uppgift 2.
+
+Likelihood-ratio test. 
 
 ```{r}
 eta <- NR(theta0 = c(0, 0, 0), niter = 10, y, X[, -3])
@@ -54,11 +56,13 @@ eta
 
 c(eta)
 
-W <- 2*(l(c(eta), y, X[,-3]) -  l(c(0,0,0), y, X[,-3]))
+W <- 2*log(L(c(eta), y, X[,-3]) / L(c(0,0,0), y, X[,-3]))
 
 W
 
-chisq.test(W)
+exp((-1/2)*dchisq(0.95,3))
+
+L(c(eta), y, X[,-3]) / L(c(0,0,0), y, X[,-3])
 ```
 
 # Uppgift 3
@@ -71,16 +75,25 @@ Wn <- 2*log(L(c(neta), y, X[, -c(1,3)])/ L(c(0,0), y, X[, -c(1,3)]))
 Wn
 
 Ts <- t(S(c(neta), y, X[, -c(1,3)]))%*%solve(I(c(neta), y, X[, -c(1,3)]))%*%S(c(neta), y, X[, -c(1,3)])
+Ts
+
+exp((-1/2)*dchisq(0.95,2))
 ```
 
 # Uppgift 4
 
 ```{r}
-theta.Kon <- 0.5 # example value
-profil <- glm.fit(x = X[, -3], y = y,
-                  offset = theta.Kon * X[, 3],
+Pls <- function(x){
+  thet <- x
+  profil <- glm.fit(x = X[, -3], y = y,
+                  offset = thet * X[, 3],
                   family = binomial())
-profil$coeff
+  L(profil$coeff, y, X[,-3])
+}
+
+Pls(-0.5)
+
+#curve(Pls, from=0, to=1, xlab="x", ylab="y")
 ```
 
 Bas koden framme, justera efter upplysning. Stora skillnad av resultat från instruktioner, fel input?
