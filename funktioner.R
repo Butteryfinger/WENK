@@ -1,25 +1,17 @@
 L <- function(theta, y, x){
   p <- 1/(1+exp(-x%*%t(t(theta)))) # Logistik sannolikhet
   
-  res <- c()
-  for (pi in p){
-    it <- dbinom(1, 1, pi) # Bernoulli fördelning
-    res <- append(res, it)
-  }
+  it <- dbinom(y, 1, p) # Bernoulli fördelning
 
-  return(prod(res))
+  return(prod(it))
 }
 
 l <- function(theta, y, x){
   p <- 1/(1+exp(-x%*%t(t(theta))))
   
-  res <- c()
-  for (pi in p){
-    it <- dbinom(1, 1, pi)
-    res <- append(res, it)
-  }
+  it <- dbinom(y, 1, p) # Bernoulli fördelning
 
-  return(sum(log(res)))
+  return(sum(log(it)))
 }
 
 S <- function(theta, y, x){
@@ -51,3 +43,4 @@ NR <- function(theta0, niter, y, x){
   }
   return(ntheta)
 }
+

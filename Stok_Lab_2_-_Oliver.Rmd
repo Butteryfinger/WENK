@@ -50,19 +50,16 @@ Eh tillräckligt nära z-värde
 Likelihood-ratio test. 
 
 ```{r}
+full <- NR(theta0 = c(0, 0, 0, 0), niter = 10, y, X)
 eta <- NR(theta0 = c(0, 0, 0), niter = 10, y, X[, -3])
 
 eta
 
 c(eta)
 
-W <- 2*log(L(c(eta), y, X[,-3]) / L(c(0,0,0), y, X[,-3]))
+W <- 2*log(L(c(full), y, X) / L(c(eta), y, X[,-3]))
 
 W
-
-exp((-1/2)*dchisq(0.95,3))
-
-L(c(eta), y, X[,-3]) / L(c(0,0,0), y, X[,-3])
 ```
 
 # Uppgift 3
@@ -71,27 +68,24 @@ L(c(eta), y, X[,-3]) / L(c(0,0,0), y, X[,-3])
 neta <- NR(theta0 = c(0, 0), niter = 10, y, X[, -c(1,3)])
 neta
 
-Wn <- 2*log(L(c(neta), y, X[, -c(1,3)])/ L(c(0,0), y, X[, -c(1,3)]))
-Wn
-
 Ts <- t(S(c(neta), y, X[, -c(1,3)]))%*%solve(I(c(neta), y, X[, -c(1,3)]))%*%S(c(neta), y, X[, -c(1,3)])
 Ts
-
-exp((-1/2)*dchisq(0.95,2))
 ```
 
 # Uppgift 4
 
 ```{r}
 Pls <- function(x){
-  thet <- x
+  theta_k <- x
   profil <- glm.fit(x = X[, -3], y = y,
-                  offset = thet * X[, 3],
+                  offset = theta_k * X[, 3],
                   family = binomial())
-  L(profil$coeff, y, X[,-3])
+  koeff <- profil$coeff
+  
+  L(c(koeff[1],koeff[2], theta_k, koeff[3]), y, X)
 }
 
-Pls(-0.5)
+Pls(0.5)
 
 #curve(Pls, from=0, to=1, xlab="x", ylab="y")
 ```
